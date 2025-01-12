@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, Send, Pencil, Trash2, X, Save } from 'lucide-react'
+import { Star, Send, Pencil, Trash2, X, Save, Volume2 } from 'lucide-react'
 
 interface Sentence {
   _id: string
@@ -34,6 +34,12 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
     }
   }
 
+  const handleSpeak = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {sentences.map((sentence) => (
@@ -54,6 +60,15 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
                 {sentence.chinese}
               </p>
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSpeak(sentence.english);
+              }}
+              className="p-1.5 sm:p-2 rounded-lg bg-white/10 text-white hover:bg-white/20"
+            >
+              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
           <Send className="absolute right-3 sm:right-4 top-3 sm:top-4 w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
         </motion.div>
