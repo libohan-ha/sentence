@@ -20,6 +20,7 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
   const [selectedSentence, setSelectedSentence] = useState<Sentence | null>(null)
   const [editMode, setEditMode] = useState(false)
   const [editData, setEditData] = useState({ english: '', chinese: '' })
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const handleEdit = (sentence: Sentence) => {
     setEditMode(true)
@@ -38,6 +39,10 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     window.speechSynthesis.speak(utterance);
+  }
+
+  const handleAnimationComplete = () => {
+    setIsAnimating(false)
   }
 
   return (
@@ -74,17 +79,29 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
         </motion.div>
       ))}
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {selectedSentence && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.2,
+              ease: "easeInOut"
+            }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto"
             onClick={() => !editMode && setSelectedSentence(null)}
           >
             <motion.div
               layoutId={`card-${selectedSentence._id}`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30
+              }}
               className="relative w-full max-w-2xl bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl m-auto"
               onClick={(e) => e.stopPropagation()}
             >
@@ -124,15 +141,16 @@ export default function SentenceList({ sentences, onDelete, onEdit }: SentenceLi
               ) : (
                 <>
                   <motion.div
-                    animate={{ 
+                    animate={isAnimating ? { 
                       rotate: [0, 2, -2, 0],
                       scale: [1, 1.02, 0.98, 1]
-                    }}
+                    } : {}}
                     transition={{
-                      duration: 4,
-                      repeat: Infinity,
+                      duration: 0.5,
                       ease: "easeInOut"
                     }}
+                    onAnimationComplete={handleAnimationComplete}
+                    onClick={() => setIsAnimating(true)}
                     className="flex items-start gap-3 sm:gap-4"
                   >
                     <Star className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-300 mt-1 flex-shrink-0" />
